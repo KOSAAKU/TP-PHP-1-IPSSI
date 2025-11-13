@@ -10,7 +10,6 @@ $profiles = [
 ];
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    // return an HTTP 405 Method Not Allowed response
     header($_SERVER["SERVER_PROTOCOL"] . " 405 Method Not Allowed", true, 405);
     echo "405 Method Not Allowed";
     exit;
@@ -36,7 +35,6 @@ $sexe = trim(htmlspecialchars($_POST['sexe']));
 $ville = trim(htmlspecialchars($_POST['ville']));
 $loisir = trim(htmlspecialchars($_POST['loisir']));
 
-// check fields aren't empty after trimming
 if (empty($nom) || empty($email) || empty($password) || empty($sexe) || empty($ville) || empty($loisir)) {
     header($_SERVER["SERVER_PROTOCOL"] . " 400 Bad Request", true, 400);
     $error = "400 Bad Request: All fields must be non-empty.";
