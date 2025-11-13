@@ -1,5 +1,14 @@
 <?php
 
+$profiles = [
+    ['nom' => 'Alice Dupont', 'email' => 'alice@ipssi.net', 'password' => 'alice123', 'sexe' => 'Femme', 'ville' => 'Paris', 'loisir' => ['Lecture', 'Natation']],
+    ['nom' => 'Bob Martin',  'email' => 'bob@ipssi.net', 'password' => 'bob123', 'sexe' => 'Homme',  'ville' => 'Lyon',  'loisir' => ['Football', 'Cinéma']],
+    ['nom' => 'Carla Rossi', 'email' => 'carla@ipssi.net', 'password' => 'carla123', 'sexe' => 'Femme', 'ville' => 'Nice',  'loisir' => ['Randonnée']],
+    ['nom' => 'David Lee',   'email' => 'david@ipssi.net', 'password' => 'david123', 'sexe' => 'Homme',  'ville' => 'Paris', 'loisir' => ['Cuisine', 'Lecture']],
+    ['nom' => 'Eva Morel',   'email' => 'eva@ipssi.net', 'password' => 'eva123', 'sexe' => 'Femme', 'ville' => 'Lyon',  'loisir' => ['Natation', 'Voyage']],
+
+];
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     // return an HTTP 405 Method Not Allowed response
     header($_SERVER["SERVER_PROTOCOL"] . " 405 Method Not Allowed", true, 405);
@@ -20,12 +29,12 @@ foreach ($requiredFields as $field) {
     }
 }
 
-$nom = trim($_POST['nom']);
-$email = trim($_POST['email']);
-$password = $_POST['password'];
-$sexe = $_POST['sexe'];
-$ville = trim($_POST['ville']);
-$loisir = $_POST['loisir'];
+$nom = trim(htmlspecialchars($_POST['nom']));
+$email = trim(htmlspecialchars($_POST['email']));
+$password = trim(htmlspecialchars($_POST['password']));
+$sexe = trim(htmlspecialchars($_POST['sexe']));
+$ville = trim(htmlspecialchars($_POST['ville']));
+$loisir = trim(htmlspecialchars($_POST['loisir']));
 
 if (strlen($nom) < 2 || strlen($nom) > 16) {
     header($_SERVER["SERVER_PROTOCOL"] . " 400 Bad Request", true, 400);
@@ -43,9 +52,9 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
-if (strlen($password) < 8 || strlen($password) > 64) {
+if (strlen($password) < 6 || strlen($password) > 64) {
     header($_SERVER["SERVER_PROTOCOL"] . " 400 Bad Request", true, 400);
-    $error = "400 Bad Request: 'password' must be at least 8 characters long.";
+    $error = "400 Bad Request: 'password' must be at least 6 characters long.";
     echo $error;
     header("Location: ./index.html?message=" . urlencode($error));
     exit;
@@ -59,3 +68,37 @@ if (!in_array($sexe, $allowedSexe)) {
     exit;
 }
 
+$profileFound = false;
+foreach ($profiles as $profile) {
+    if ($profile['nom'] === $nom && 
+    $profile['email'] === $email &&
+    $profile['password'] === $password &&
+    $profile['sexe'] === $sexe && 
+    $profile['ville'] === $ville) {
+        $loisirMatch = false;
+        foreach ($profile['loisir'] as $l) {
+            if (in_array($l, $profile['loisir'])) {
+                $loisirMatch = true;
+                break;
+            }
+        }
+        if ($loisirMatch) {
+            $profileFound = true;
+            break;
+        }
+    }
+}
+
+if (!$profileFound) {
+    header($_SERVER["SERVER_PROTOCOL"] . " 404 Not Found", true, 404);
+    $error = "404 Not Found: Profile not found.";
+    echo $error;
+    header("Location: ./index.html?message=" . urlencode($error));
+    exit;
+} else {
+    header($_SERVER["SERVER_PROTOCOL"] . " 200 OK", true, 200);
+    $success = "200 OK: Profile found successfully.";
+    echo $success;
+    header("Location: ./index.html?message=" . urlencode($success));
+    exit;
+}
